@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String    @id @default(uuid())
+  name             String
+  email            String    @unique
+  passwordHash     String    @map("password_hash")
+  phone            String?
+  profilePhotoUrl  String?   @map("profile_photo_url")
+  address          String?
+  timezone         String    @default("UTC")
+  plan             String    @default("free")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  clients          Client[]
+  services         Service[]
+  availability     AvailabilitySlot[]
+  appointments     Appointment[]
+  reminderTemplates ReminderTemplate[]
+}
+
+model Client {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  name      String
+  email     String?
+  phone     String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user        User      @relation(fields: [userId], references: [id])
+  appointments Appointment[]
+}
+
+model Service {
+  id              String    @id @default(uuid())
+  userId          String    @map("user_id")
+  name            String
+  description     String?
+  durationMinutes Int       @map("duration_minutes")
+  price           Decimal   @db.Decimal(10, 2)
+  color           String?   // HEX
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id])
+  appointments Appointment[]
+}
+
+model AvailabilitySlot {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  dayOfWeek Int      @map("day_of_week")
+  startTime DateTime @map("start_time")
+  endTime   DateTime @map("end_time")
+  isHoliday Boolean  @default(false) @map("is_holiday")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Appointment {
+  id            String   @id @default(uuid())
+  userId        String   @map("user_id")
+  clientId      String   @map("client_id")
+  serviceId     String   @map("service_id")
+  startDatetime DateTime @map("start_datetime")
+  endDatetime   DateTime @map("end_datetime")
+  status        String   @default("pending")
+  notes         String?
+  paymentStatus String   @default("pending") @map("payment_status")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user        User         @relation(fields: [userId], references: [id])
+  client      Client       @relation(fields: [clientId], references: [id])
+  service     Service      @relation(fields: [serviceId], references: [id])
+  payment     Payment?
+  notifications Notification[]
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  appointmentId String   @unique @map("appointment_id")
+  amount        Decimal  @db.Decimal(10, 2)
+  method        String
+  status        String   @default("pending")
+  transactionId String?  @map("transaction_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+}
+
+
+model Notification {
+  id            String   @id @default(uuid())
+  appointmentId String   @map("appointment_id")
+  type          String
+  status        String   @default("pending")
+  scheduledAt   DateTime @map("scheduled_at")
+  sentAt        DateTime?
+  message       String
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+}
+
+model ReminderTemplate {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  name      String
+  message   String
+  channel   String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+}
+
+model SaasPlan {
+  id              String   @id @default(uuid())
+  name            String   @unique
+  price           Decimal  @db.Decimal(10, 2)
+  maxServices     Int      @map("max_services")
+  maxAppointments Int      @map("max_appointments")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+}
