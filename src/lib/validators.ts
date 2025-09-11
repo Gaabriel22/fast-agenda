@@ -66,3 +66,21 @@ export const clientSchema = z.object({
   email: z.email().optional(),
   phone: z.string().optional(),
 })
+
+// -----------------------------
+// AvailabilitySlot
+// -----------------------------
+export const AvailabilitySlotSchema = z.object({
+  dayOfWeek: z
+    .number()
+    .int()
+    .min(0, { message: "Dia da semana inválido" })
+    .max(6, { message: "Dia da semana inválido" }),
+  startTime: z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: "Hora de início inválida",
+  }),
+  endTime: z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: "Hora de término inválida",
+  }),
+  isHoliday: z.boolean().optional(),
+})
