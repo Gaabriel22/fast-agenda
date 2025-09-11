@@ -22,7 +22,7 @@ export function useServices() {
   const fetchServices = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await api.get<Service[]>("/clients")
+      const res = await api.get<Service[]>("/services")
       setServices(res.data)
     } catch (err: unknown) {
       if (err instanceof Error) {
