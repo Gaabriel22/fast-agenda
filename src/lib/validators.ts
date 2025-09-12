@@ -85,3 +85,14 @@ export const AvailabilitySlotSchema = z.object({
   }),
   isHoliday: z.boolean().optional(),
 })
+
+// -----------------------------
+// Payment
+// -----------------------------
+export const paymentSchema = z.object({
+  appointmentId: z.uuid({ message: "appointmentId inválido" }),
+  amount: z.number().positive({ message: "Amount deve ser positivo" }),
+  method: z.string().min(1, { message: "Method é obrigatório" }),
+  status: z.enum(["pending", "paid", "refunded"]).default("pending"),
+  transactionId: z.string().optional(),
+})
