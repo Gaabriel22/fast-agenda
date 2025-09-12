@@ -41,6 +41,7 @@ export const serviceSchema = z.object({
 // Appointments
 // -----------------------------
 export const appointmentSchema = z.object({
+  id: z.uuid(),
   userId: z.uuid(),
   clientId: z.uuid(),
   serviceId: z.uuid(),
