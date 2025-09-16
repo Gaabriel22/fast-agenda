@@ -96,3 +96,39 @@ export const paymentSchema = z.object({
   status: z.enum(["pending", "paid", "refunded"]).default("pending"),
   transactionId: z.string().optional(),
 })
+
+// -----------------------------
+// Notification
+// -----------------------------
+export const notificationSchema = z.object({
+  appointmentId: z.uuid(),
+  type: z.string().min(1),
+  status: z.enum(["pending", "sent", "failed"]).default("pending"),
+  scheduledAt: z
+    .string()
+    .refine((val) => !isNaN(Date.parse(val)), {
+      message: "Data/hora inválida",
+    })
+    .optional(),
+  message: z.string().min(1),
+})
+
+// -----------------------------
+// ReminderTemplate
+// -----------------------------
+export const reminderTemplateSchema = z.object({
+  userId: z.uuid(),
+  name: z.string().min(2),
+  message: z.string().min(1),
+  channel: z.enum(["email", "sms", "whatsapp"]),
+})
+
+// -----------------------------
+// SaasPlan
+// -----------------------------
+export const saasPlanSchema = z.object({
+  name: z.string().min(2),
+  price: z.number().positive(),
+  maxServices: z.number().int().positive(),
+  maxAppointments: z.number().int().positive(),
+})
